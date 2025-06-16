@@ -47,15 +47,19 @@ class Inventory extends Component
 {
 
     /**
-     * Local caches for this request.
-     *
-     * @var InventoryLevel[][]            cache for getInventoryLevel()
-     * @var InventoryTransaction[][]      cache for getInventoryTransactions()
-     * @var InventoryFulfillmentLevel[][] cache for getInventoryFulfillmentLevels()
+     * @var array<non-empty-string, InventoryLevel>
      */
-    private array $_inventoryLevelCache           = [];
-    private array $_inventoryTransactionsCache    = [];
-    private array $_inventoryFulfillmentCache     = [];
+    private array $_inventoryLevelCache = [];
+
+    /**
+     * @var array<non-empty-string, Collection<string|int, InventoryTransaction>>
+     */
+    private array $_inventoryTransactionsCache = [];
+
+    /**
+     * @var array<non-empty-string, Collection<string|int, InventoryFulfillmentLevel>>
+     */
+    private array $_inventoryFulfillmentCache = [];
 
     /**
      * @param Purchasable $purchasable
@@ -137,7 +141,7 @@ class Inventory extends Component
         $inventoryItemId = $inventoryItem instanceof InventoryItem ? $inventoryItem->id : $inventoryItem;
         $inventoryLocationId = $inventoryLocation instanceof InventoryLocation ? $inventoryLocation->id : $inventoryLocation;
 
-        $cacheKey = "{$itemId}|{$locationId}|" . ($withTrashed ? '1' : '0');
+        $cacheKey = "{$inventoryItemId}|{$inventoryLocationId}|" . ($withTrashed ? '1' : '0');
 
         if (isset($this->_inventoryLevelCache[$cacheKey])) {
             return $this->_inventoryLevelCache[$cacheKey];
@@ -153,7 +157,8 @@ class Inventory extends Component
             return null;
         }
 
-        return $this->_inventoryLevelCache[$cacheKey] = $this->_populateInventoryLevel($result);
+        $this->_inventoryLevelCache[$cacheKey] = $this->_populateInventoryLevel($result);
+        return $this->_inventoryLevelCache[$cacheKey];
     }
 
 
@@ -655,7 +660,8 @@ class Inventory extends Component
 
         $transactions = collect($rows)->map(fn(array $row) => $this->_populateInventoryTransaction($row));
 
-        return $this->_inventoryTransactionsCache[$cacheKey] = $transactions;
+        $this->_inventoryTransactionsCache[$cacheKey] = $transactions;
+        return $this->_inventoryTransactionsCache[$cacheKey];
     }
 
     /**
@@ -683,30 +689,33 @@ class Inventory extends Component
                     'SUM(CASE WHEN ((it.type = :committed AND quantity > 0) OR (it.type = :fulfilled AND quantity < 0)) THEN quantity ELSE 0 END) AS committedQuantity',
                     'SUM(CASE WHEN it.type = :committed THEN quantity ELSE 0 END) AS outstandingCommittedQuantity',
                     'SUM(CASE WHEN it.type = :fulfilled THEN quantity ELSE 0 END) AS fulfilledQuantity',
-	        ])
-		->from(['it' => Table::INVENTORYTRANSACTIONS])
-		->andWhere([
-                    '[[li.orderId]]'             => $orderId,
-                    'it.inventoryLocationId'     => $location->id,
-		])
-		->andWhere(['or',
+                ])
+                ->from(['it' => Table::INVENTORYTRANSACTIONS])
+                ->andWhere([
+                    '[[li.orderId]]' => $orderId,
+                    'it.inventoryLocationId' => $location->id,
+                ])
+                ->andWhere([
+                    'or',
                     ['it.type' => InventoryTransactionType::COMMITTED->value],
                     ['it.type' => InventoryTransactionType::FULFILLED->value],
-		])
-		->innerJoin(['li' => Table::LINEITEMS], '[[li.id]] = [[it.lineItemId]]')
-		->groupBy(['it.lineItemId','it.inventoryItemId','it.inventoryLocationId'])
-		->params([
+                ])
+                ->innerJoin(['li' => Table::LINEITEMS], '[[li.id]] = [[it.lineItemId]]')
+                ->groupBy(['it.lineItemId', 'it.inventoryItemId', 'it.inventoryLocationId'])
+                ->params([
                     ':committed' => InventoryTransactionType::COMMITTED->value,
                     ':fulfilled' => InventoryTransactionType::FULFILLED->value,
-		])
-		->all();
+                ])
+                ->all();
 
-		foreach ($data as $row) {
-                    $allLevels[] = $this->_populateInventoryFulfillmentLevel($row);
-		}
+            foreach ($data as $row) {
+                $allLevels[] = $this->_populateInventoryFulfillmentLevel($row);
+            }
         }
 
-        return $this->_inventoryFulfillmentCache[$orderId] = collect($allLevels);
+
+        $this->_inventoryFulfillmentCache[$orderId] = collect($allLevels);
+        return $this->_inventoryFulfillmentCache[$orderId];
     }
 
     /**
