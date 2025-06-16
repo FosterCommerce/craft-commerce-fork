@@ -672,7 +672,7 @@ abstract class PurchasableQuery extends ElementQuery
 
         if (!empty($this->id)) {
             $catalogPricesQuery->andWhere(['cp.purchasableId' => $this->id]);
-		}
+	}
 
         $this->subQuery->leftJoin(['sitestores' => Table::SITESTORES], '[[elements_sites.siteId]] = [[sitestores.siteId]]');
         $this->subQuery->leftJoin(['purchasables_stores' => Table::PURCHASABLES_STORES], '[[purchasables_stores.storeId]] = [[sitestores.storeId]] AND [[purchasables_stores.purchasableId]] = [[commerce_purchasables.id]]');
