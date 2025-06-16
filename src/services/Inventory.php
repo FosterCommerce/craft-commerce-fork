@@ -61,7 +61,7 @@ class Inventory extends Component
      * @param Purchasable $purchasable
      * @return Collection<InventoryLevel>
      */
-	public function getInventoryLevelsForPurchasable(Purchasable $purchasable): Collection
+    public function getInventoryLevelsForPurchasable(Purchasable $purchasable): Collection
     {
         $inventoryLevels = collect();
 
