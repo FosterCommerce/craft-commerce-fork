@@ -336,6 +336,14 @@ class Plugin extends BasePlugin
     /**
      * @inheritdoc
      */
+    public function getVersion(): string
+	{
+		return '5.4.5.1';
+	}
+
+    /**
+     * @inheritdoc
+     */
     public function beforeInstall(): void
     {
         // Check version before installing
