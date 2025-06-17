@@ -336,6 +336,14 @@ class Plugin extends BasePlugin
     /**
      * @inheritdoc
      */
+    public function getVersion(): string
+	{
+		return '5.3.13';
+	}
+
+    /**
+     * @inheritdoc
+     */
     public function beforeInstall(): void
     {
         // Check version before installing
