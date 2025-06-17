@@ -56,7 +56,10 @@
     "name": "Craft Commerce",
     "description": "Create beautifully bespoke ecommerce experiences",
     "developer": "Pixel & Tonic",
-    "documentationUrl": "https://craftcms.com/docs/commerce/4.x/"
+    "documentationUrl": "https://craftcms.com/docs/commerce/4.x/",
+    "branch-alias": {
+      "dev-patch/slow-carts": "5.3.x-dev"
+    }
   },
   "scripts": {
     "check-cs": "ecs check --ansi",
