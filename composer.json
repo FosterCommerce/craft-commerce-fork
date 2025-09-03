@@ -58,7 +58,7 @@
     "developer": "Pixel & Tonic",
     "documentationUrl": "https://craftcms.com/docs/commerce/4.x/",
     "branch-alias": {
-      "dev-patch/slow-carts": "5.3.x-dev"
+      "dev-patch/slow-carts": "5.4.x-dev"
     }
   },
   "scripts": {

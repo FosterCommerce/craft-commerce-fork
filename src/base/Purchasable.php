@@ -738,7 +738,6 @@ abstract class Purchasable extends Element implements PurchasableInterface, HasS
     public function getSnapshot(): array
     {
         return [
-            'catalogPricingRuleId' => $this->catalogPricingRuleId,
         ];
     }
 
